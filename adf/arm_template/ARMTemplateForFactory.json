@@ -1,0 +1,800 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "type": "string",
+            "metadata": "Data Factory name",
+            "defaultValue": "adf-velocite-dev"
+        },
+        "LS_AzureSQL_VeloCite_properties_typeProperties_server": {
+            "type": "string",
+            "defaultValue": "sql-velocite.database.windows.net"
+        },
+        "LS_AzureSQL_VeloCite_properties_typeProperties_database": {
+            "type": "string",
+            "defaultValue": "sqldb-velocite"
+        },
+        "LS_ADLS_VeloCite_properties_typeProperties_url": {
+            "type": "string",
+            "defaultValue": "https://ilyestristanflo2.dfs.core.windows.net/"
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_SQL_Locations')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "LS_AzureSQL_VeloCite",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    {
+                        "name": "location_id",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "abonne_id",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "station_depart",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "station_arrivee",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "debut",
+                        "type": "datetime2",
+                        "scale": 7
+                    },
+                    {
+                        "name": "fin",
+                        "type": "datetime2",
+                        "scale": 7
+                    },
+                    {
+                        "name": "montant",
+                        "type": "decimal",
+                        "precision": 6,
+                        "scale": 2
+                    },
+                    {
+                        "name": "modifie_le",
+                        "type": "datetime2",
+                        "scale": 7
+                    }
+                ],
+                "typeProperties": {
+                    "schema": "dbo",
+                    "table": "locations"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_VeloCite')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_ADLS_RAW_Locations')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "LS_ADLS_VeloCite",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "folder": {
+                        "type": "string"
+                    },
+                    "file": {
+                        "type": "string"
+                    }
+                },
+                "annotations": [],
+                "type": "Parquet",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": {
+                            "value": "@dataset().file",
+                            "type": "Expression"
+                        },
+                        "folderPath": {
+                            "value": "@dataset().folder",
+                            "type": "Expression"
+                        },
+                        "fileSystem": "raw"
+                    },
+                    "compressionCodec": "snappy"
+                },
+                "schema": []
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/LS_ADLS_VeloCite')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_SQL_Stations')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "LS_AzureSQL_VeloCite",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    {
+                        "name": "station_id",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "nom",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "capacite",
+                        "type": "int",
+                        "precision": 10
+                    }
+                ],
+                "typeProperties": {
+                    "schema": "dbo",
+                    "table": "stations"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_VeloCite')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_ADLS_RAW_Stations')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "LS_ADLS_VeloCite",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "folder": {
+                        "type": "string"
+                    },
+                    "file": {
+                        "type": "string"
+                    }
+                },
+                "annotations": [],
+                "type": "Parquet",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": {
+                            "value": "@dataset().file",
+                            "type": "Expression"
+                        },
+                        "folderPath": {
+                            "value": "@dataset().folder",
+                            "type": "Expression"
+                        },
+                        "fileSystem": "raw"
+                    },
+                    "compressionCodec": "snappy"
+                },
+                "schema": []
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/LS_ADLS_VeloCite')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_ADLS_RAW_Abonnes')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "LS_ADLS_VeloCite",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "folder": {
+                        "type": "string"
+                    },
+                    "file": {
+                        "type": "string"
+                    }
+                },
+                "annotations": [],
+                "type": "Parquet",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": {
+                            "value": "@dataset().file",
+                            "type": "Expression"
+                        },
+                        "folderPath": {
+                            "value": "@dataset().folder",
+                            "type": "Expression"
+                        },
+                        "fileSystem": "raw"
+                    },
+                    "compressionCodec": "snappy"
+                },
+                "schema": []
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/LS_ADLS_VeloCite')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_SQL_Abonnes')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "LS_AzureSQL_VeloCite",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [],
+                "typeProperties": {
+                    "schema": "dbo",
+                    "table": "abonnes"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_VeloCite')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/LS_AzureSQL_VeloCite')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureSqlDatabase",
+                "typeProperties": {
+                    "server": "[parameters('LS_AzureSQL_VeloCite_properties_typeProperties_server')]",
+                    "database": "[parameters('LS_AzureSQL_VeloCite_properties_typeProperties_database')]",
+                    "encrypt": "mandatory",
+                    "trustServerCertificate": false,
+                    "authenticationType": "SystemAssignedManagedIdentity"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/LS_ADLS_VeloCite')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureBlobFS",
+                "typeProperties": {
+                    "url": "[parameters('LS_ADLS_VeloCite_properties_typeProperties_url')]"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/P01_RAW')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "COPY_LOCATIONS_TO_RAW",
+                        "type": "Copy",
+                        "dependsOn": [
+                            {
+                                "activity": "LKP_WM_LOCATIONS",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 3,
+                            "retryIntervalInSeconds": 60,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "AzureSqlSource",
+                                "sqlReaderQuery": {
+                                    "value": "@concat('SELECT * FROM dbo.locations WHERE modifie_le > DATEADD(DAY, -7, CAST(''', activity('LKP_WM_LOCATIONS').output.firstRow.last_value, ''' AS DATETIME2)) AND modifie_le <= CAST(''', formatDateTime(pipeline().TriggerTime, 'yyyy-MM-ddTHH:mm:ss'), ''' AS DATETIME2)')",
+                                    "type": "Expression"
+                                },
+                                "queryTimeout": "02:00:00",
+                                "partitionOption": "None"
+                            },
+                            "sink": {
+                                "type": "ParquetSink",
+                                "storeSettings": {
+                                    "type": "AzureBlobFSWriteSettings"
+                                },
+                                "formatSettings": {
+                                    "type": "ParquetWriteSettings"
+                                }
+                            },
+                            "enableStaging": false,
+                            "translator": {
+                                "type": "TabularTranslator",
+                                "typeConversion": true,
+                                "typeConversionSettings": {
+                                    "allowDataTruncation": true,
+                                    "treatBooleanAsNumber": false
+                                }
+                            }
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "DS_SQL_Locations",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "DS_ADLS_RAW_Locations",
+                                "type": "DatasetReference",
+                                "parameters": {
+                                    "folder": "@concat('sql/locations/ingest_date=', formatDateTime(utcnow(),'yyyy-MM-dd'))",
+                                    "file": "@concat(pipeline().RunId,'.parquet')"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "COPY_ABONNES_TO_RAW",
+                        "type": "Copy",
+                        "dependsOn": [
+                            {
+                                "activity": "LKP_WM_ABONNES",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "AzureSqlSource",
+                                "sqlReaderQuery": {
+                                    "value": "@concat('SELECT * FROM dbo.abonnes WHERE modifie_le > DATEADD(DAY, -7, CAST(''', activity('LKP_WM_ABONNES').output.firstRow.last_value, ''' AS DATETIME2)) AND modifie_le <= CAST(''', formatDateTime(pipeline().TriggerTime, 'yyyy-MM-ddTHH:mm:ss'), ''' AS DATETIME2)')",
+                                    "type": "Expression"
+                                },
+                                "queryTimeout": "02:00:00",
+                                "partitionOption": "None"
+                            },
+                            "sink": {
+                                "type": "ParquetSink",
+                                "storeSettings": {
+                                    "type": "AzureBlobFSWriteSettings"
+                                },
+                                "formatSettings": {
+                                    "type": "ParquetWriteSettings"
+                                }
+                            },
+                            "enableStaging": false,
+                            "translator": {
+                                "type": "TabularTranslator",
+                                "typeConversion": true,
+                                "typeConversionSettings": {
+                                    "allowDataTruncation": true,
+                                    "treatBooleanAsNumber": false
+                                }
+                            }
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "DS_SQL_Abonnes",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "DS_ADLS_RAW_Abonnes",
+                                "type": "DatasetReference",
+                                "parameters": {
+                                    "folder": "@concat('sql/abonnes/ingest_date=', formatDateTime(utcnow(),'yyyy-MM-dd'))",
+                                    "file": "@concat(pipeline().RunId,'.parquet')"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "COPY_STATIONS_TO_RAW",
+                        "type": "Copy",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "AzureSqlSource",
+                                "queryTimeout": "02:00:00",
+                                "partitionOption": "None"
+                            },
+                            "sink": {
+                                "type": "ParquetSink",
+                                "storeSettings": {
+                                    "type": "AzureBlobFSWriteSettings"
+                                },
+                                "formatSettings": {
+                                    "type": "ParquetWriteSettings"
+                                }
+                            },
+                            "enableStaging": false,
+                            "translator": {
+                                "type": "TabularTranslator",
+                                "typeConversion": true,
+                                "typeConversionSettings": {
+                                    "allowDataTruncation": true,
+                                    "treatBooleanAsNumber": false
+                                }
+                            }
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "DS_SQL_Stations",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "DS_ADLS_RAW_Stations",
+                                "type": "DatasetReference",
+                                "parameters": {
+                                    "folder": "@concat('sql/stations/ingest_date=', formatDateTime(utcnow(),'yyyy-MM-dd'))",
+                                    "file": "@concat(pipeline().RunId,'.parquet')"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "LKP_WM_LOCATIONS",
+                        "type": "Lookup",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "AzureSqlSource",
+                                "sqlReaderQuery": "SELECT CONVERT(VARCHAR(19), last_value, 126) AS last_value FROM etl.control WHERE table_name = 'locations'",
+                                "queryTimeout": "02:00:00",
+                                "partitionOption": "None"
+                            },
+                            "dataset": {
+                                "referenceName": "DS_SQL_Locations",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        }
+                    },
+                    {
+                        "name": "SP_SET_WM_LOCATIONS",
+                        "type": "SqlServerStoredProcedure",
+                        "dependsOn": [
+                            {
+                                "activity": "COPY_LOCATIONS_TO_RAW",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "storedProcedureName": "[[etl].[usp_set_watermark]",
+                            "storedProcedureParameters": {
+                                "table_name": {
+                                    "value": "locations",
+                                    "type": "String"
+                                },
+                                "new_value": {
+                                    "value": "@formatDateTime(pipeline().TriggerTime, 'yyyy-MM-ddTHH:mm:ss')",
+                                    "type": "Datetime"
+                                }
+                            }
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "LS_AzureSQL_VeloCite",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "SP_LOG_LOCATIONS",
+                        "type": "SqlServerStoredProcedure",
+                        "dependsOn": [
+                            {
+                                "activity": "SP_SET_WM_LOCATIONS",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "storedProcedureName": "[[etl].[usp_log_run]",
+                            "storedProcedureParameters": {
+                                "error_message": {
+                                    "value": null,
+                                    "type": "String"
+                                },
+                                "pipeline_run": {
+                                    "value": {
+                                        "value": "@pipeline().RunId",
+                                        "type": "Expression"
+                                    },
+                                    "type": "String"
+                                },
+                                "rows_copied": {
+                                    "value": {
+                                        "value": "@activity('COPY_LOCATIONS_TO_RAW').output.rowsCopied",
+                                        "type": "Expression"
+                                    },
+                                    "type": "Int64"
+                                },
+                                "rows_read": {
+                                    "value": {
+                                        "value": "@activity('COPY_LOCATIONS_TO_RAW').output.rowsRead",
+                                        "type": "Expression"
+                                    },
+                                    "type": "Int64"
+                                },
+                                "run_date": {
+                                    "value": {
+                                        "value": "@formatDateTime(utcnow(), 'yyyy-MM-dd')",
+                                        "type": "Expression"
+                                    },
+                                    "type": "DateTime"
+                                },
+                                "status": {
+                                    "value": "Succeeded",
+                                    "type": "String"
+                                },
+                                "table_name": {
+                                    "value": "locations",
+                                    "type": "String"
+                                },
+                                "wm_from": {
+                                    "value": {
+                                        "value": "@activity('LKP_WM_LOCATIONS').output.firstRow.last_value",
+                                        "type": "Expression"
+                                    },
+                                    "type": "DateTime"
+                                },
+                                "wm_to": {
+                                    "value": {
+                                        "value": "@formatDateTime(pipeline().TriggerTime, 'yyyy-MM-ddTHH:mm:ss')",
+                                        "type": "Expression"
+                                    },
+                                    "type": "DateTime"
+                                }
+                            }
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "LS_AzureSQL_VeloCite",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "LKP_WM_ABONNES",
+                        "type": "Lookup",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "AzureSqlSource",
+                                "sqlReaderQuery": "SELECT CONVERT(VARCHAR(19), last_value, 126) AS last_value FROM etl.control WHERE table_name = 'abonnes'",
+                                "queryTimeout": "02:00:00",
+                                "partitionOption": "None"
+                            },
+                            "dataset": {
+                                "referenceName": "DS_SQL_Locations",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        }
+                    },
+                    {
+                        "name": "SP_SET_WM_ABONNES",
+                        "type": "SqlServerStoredProcedure",
+                        "dependsOn": [
+                            {
+                                "activity": "COPY_ABONNES_TO_RAW",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "storedProcedureName": "[[etl].[usp_set_watermark]",
+                            "storedProcedureParameters": {
+                                "table_name": {
+                                    "value": "abonnes",
+                                    "type": "String"
+                                },
+                                "new_value": {
+                                    "value": "@formatDateTime(pipeline().TriggerTime, 'yyyy-MM-ddTHH:mm:ss')",
+                                    "type": "Datetime"
+                                }
+                            }
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "LS_AzureSQL_VeloCite",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "SP_LOG_ABONNES",
+                        "type": "SqlServerStoredProcedure",
+                        "dependsOn": [
+                            {
+                                "activity": "SP_SET_WM_ABONNES",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "storedProcedureName": "[[etl].[usp_log_run]",
+                            "storedProcedureParameters": {
+                                "error_message": {
+                                    "value": null,
+                                    "type": "String"
+                                },
+                                "pipeline_run": {
+                                    "value": {
+                                        "value": "@pipeline().RunId",
+                                        "type": "Expression"
+                                    },
+                                    "type": "String"
+                                },
+                                "rows_copied": {
+                                    "value": {
+                                        "value": "@activity('COPY_ABONNES_TO_RAW').output.rowsCopied",
+                                        "type": "Expression"
+                                    },
+                                    "type": "Int64"
+                                },
+                                "rows_read": {
+                                    "value": {
+                                        "value": "@activity('COPY_ABONNES_TO_RAW').output.rowsRead",
+                                        "type": "Expression"
+                                    },
+                                    "type": "Int64"
+                                },
+                                "run_date": {
+                                    "value": {
+                                        "value": "@formatDateTime(utcnow(), 'yyyy-MM-dd')",
+                                        "type": "Expression"
+                                    },
+                                    "type": "DateTime"
+                                },
+                                "status": {
+                                    "value": "Succeeded",
+                                    "type": "String"
+                                },
+                                "table_name": {
+                                    "value": "abonnes",
+                                    "type": "String"
+                                },
+                                "wm_from": {
+                                    "value": {
+                                        "value": "@activity('LKP_WM_ABONNES').output.firstRow.last_value",
+                                        "type": "Expression"
+                                    },
+                                    "type": "DateTime"
+                                },
+                                "wm_to": {
+                                    "value": {
+                                        "value": "@formatDateTime(pipeline().TriggerTime, 'yyyy-MM-ddTHH:mm:ss')",
+                                        "type": "Expression"
+                                    },
+                                    "type": "DateTime"
+                                }
+                            }
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "LS_AzureSQL_VeloCite",
+                            "type": "LinkedServiceReference"
+                        }
+                    }
+                ],
+                "policy": {
+                    "elapsedTimeMetric": {}
+                },
+                "annotations": [],
+                "lastPublishTime": "2026-10-23T07:49:13Z"
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/datasets/DS_SQL_Locations')]",
+                "[concat(variables('factoryId'), '/datasets/DS_ADLS_RAW_Locations')]",
+                "[concat(variables('factoryId'), '/datasets/DS_SQL_Abonnes')]",
+                "[concat(variables('factoryId'), '/datasets/DS_ADLS_RAW_Abonnes')]",
+                "[concat(variables('factoryId'), '/datasets/DS_SQL_Stations')]",
+                "[concat(variables('factoryId'), '/datasets/DS_ADLS_RAW_Stations')]",
+                "[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_VeloCite')]"
+            ]
+        }
+    ]
+}

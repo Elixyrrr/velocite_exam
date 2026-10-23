@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "value": "adf-velocite-dev"
+        },
+        "LS_AzureSQL_VeloCite_properties_typeProperties_server": {
+            "value": "sql-velocite.database.windows.net"
+        },
+        "LS_AzureSQL_VeloCite_properties_typeProperties_database": {
+            "value": "sqldb-velocite"
+        },
+        "LS_ADLS_VeloCite_properties_typeProperties_url": {
+            "value": "https://ilyestristanflo2.dfs.core.windows.net/"
+        },
+        "containerUri": {
+            "value": ""
+        },
+        "containerSasToken": {
+            "value": ""
+        }
+    }
+}

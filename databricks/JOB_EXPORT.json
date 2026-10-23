@@ -1,0 +1,107 @@
+{
+  "name": "velocite_daily",
+  "email_notifications": {
+    "on_failure": [
+      "i.khedhiri@hotmail.fr"
+    ],
+    "no_alert_for_skipped_runs": false
+  },
+  "webhook_notifications": {},
+  "notification_settings": {
+    "no_alert_for_skipped_runs": false,
+    "no_alert_for_canceled_runs": false
+  },
+  "timeout_seconds": 0,
+  "max_concurrent_runs": 1,
+  "tasks": [
+    {
+      "task_key": "referentiels",
+      "run_if": "ALL_SUCCESS",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Shared/velocite_exam/velocite_notebooks (1)/01_curated_referentiels",
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {},
+      "environment_key": "Default",
+      "disabled": false
+    },
+    {
+      "task_key": "locations",
+      "depends_on": [
+        {
+          "task_key": "referentiels"
+        }
+      ],
+      "run_if": "ALL_SUCCESS",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Shared/velocite_exam/velocite_notebooks (1)/02_curated_locations",
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {},
+      "environment_key": "Default",
+      "disabled": false
+    },
+    {
+      "task_key": "consumption",
+      "depends_on": [
+        {
+          "task_key": "locations"
+        }
+      ],
+      "run_if": "ALL_SUCCESS",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Shared/velocite_exam/velocite_notebooks (1)/04_consumption",
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {},
+      "environment_key": "Default",
+      "disabled": false
+    },
+    {
+      "task_key": "meteo_api",
+      "depends_on": [
+        {
+          "task_key": "referentiels"
+        }
+      ],
+      "run_if": "ALL_SUCCESS",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Shared/velocite_exam/velocite_notebooks (1)/03_curated_meteo_api",
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {},
+      "environment_key": "Default",
+      "disabled": false
+    }
+  ],
+  "queue": {
+    "enabled": true
+  },
+  "parameters": [
+    {
+      "name": "run_date",
+      "default": ""
+    },
+    {
+      "name": "full_refresh",
+      "default": "false"
+    }
+  ],
+  "environments": [
+    {
+      "environment_key": "Default",
+      "spec": {
+        "environment_version": "6"
+      }
+    }
+  ],
+  "performance_target": "STANDARD"
+}
